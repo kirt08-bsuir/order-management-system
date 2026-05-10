@@ -1,0 +1,26 @@
+#include <stdio.h>
+#include <assert.h>
+
+#include "tests.h"
+
+
+void run_tests(void) {
+    printf("\n========== TESTS START ==========\n");
+
+    printf("\n--------- (Unit) ---------\n");
+
+    assert(test_unit_table_create() == 1);
+    printf("[OK] test_unit_table_create\n");
+
+    assert(test_unit_resize_capacity() == 1);
+    printf("[OK] test_unit_resize_capacity\n");
+
+
+    // printf("\n--------- (Integration) ---------\n");
+    // assert(test_integration_add_and_rebuild_indexes() == 1);
+    // printf("[OK] test_integration_add_and_rebuild_indexes\n");
+
+    printf("\n===================================\n");
+    printf("✅ TESTS PASSED SUCCESSFULLY!\n");
+    printf("===================================\n\n");
+}
