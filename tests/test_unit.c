@@ -97,3 +97,27 @@ int test_unit_products_editing_valid(void) {
 
     if (res == 0) return 1; else return 0;
 }
+
+int test_unit_products_search_by_id_non_existing_record(void) {
+    ProductsTable *table = products_table_create();
+
+    Product *p = products_table_search_by_id(table, 1);
+
+    products_table_free(table);
+    table = NULL;
+
+    if (p == NULL) return 1; else return 0;
+}
+
+
+int test_unit_products_search_by_id_existing_record(void) {
+    ProductsTable *table = products_table_create();
+
+    products_table_add(table, "Test", 1, 1);
+    Product *p = products_table_search_by_id(table, 1);
+
+    products_table_free(table);
+    table = NULL;
+
+    if (p != NULL) return 1; else return 0;
+}

@@ -249,6 +249,21 @@ int products_table_edit_record(
     return 0;
 }
 
+Product *products_table_search_by_id(ProductsTable *products_table, const unsigned int product_id) {
+    if (!products_table) return NULL;
+
+    int idx = _products_binary_search_by_id(products_table, product_id);
+    if (idx == -1) {
+        if (DEBUG) printf("Recor wasn't found.\n");
+        return NULL;
+    }
+
+    Product* p = &products_table->original_table[idx];
+
+    if (p->is_deleted) return NULL;
+    return p;
+}
+
 void product_print(const Product *p) {
     if (!p) return;
  

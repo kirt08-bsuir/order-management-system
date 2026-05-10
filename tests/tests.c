@@ -30,6 +30,11 @@ void run_tests(void) {
     assert(test_unit_products_editing_valid() == 1);
     printf("[OK] test_unit_products_editing_valid\n");
 
+    assert(test_unit_products_search_by_id_non_existing_record() == 1);
+    printf("[OK] test_unit_products_search_by_id_non_existing_record\n");
+
+    assert(test_unit_products_search_by_id_existing_record() == 1);
+    printf("[OK] test_unit_products_search_by_id_existing_record\n");
 
     // printf("\n--------- (Integration) ---------\n");
     // assert(test_integration_add_and_rebuild_indexes() == 1);
