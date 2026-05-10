@@ -29,7 +29,7 @@ typedef struct {
 } ProductsTable;
 
 
-ProductsTable *products_table_create();
+ProductsTable *products_table_create(void);
 
 int products_table_load(const ProductsTable *products_table);
 int products_table_save(const ProductsTable *products_table);
@@ -48,13 +48,14 @@ unsigned int products_table_add(
 // returns 0 or -1 if not found, 1 if error occurs
 int products_table_delete_by_id(ProductsTable *products_table, const unsigned int product_id);
 
-// chenges record with product_id = product_id, recounts indexes
+// changes record with product_id = product_id, recounts indexes
 // returns 0 or -1 if not found, 1 if error occurs
 int products_table_edit_record(
     ProductsTable *products_table,
     const unsigned int product_id,
     const char *name,
     const unsigned int unit_price,
+    const bool change_quantity,
     const unsigned int quantity
 );
 
@@ -76,7 +77,7 @@ void products_table_print_all(const ProductsTable *products_table);
 void products_table_sorted_by_name(const ProductsTable *products_table);
 
 // print records sorted by quantity where is_deleted = false
-void products_table_print_sorted_by_quantity(const ProductsTable *product_table);
+void products_table_sorted_by_quantity(const ProductsTable *product_table);
 
 void products_table_free(ProductsTable *products_table);
 
