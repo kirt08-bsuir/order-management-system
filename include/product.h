@@ -29,7 +29,7 @@ typedef struct {
 } ProductsTable;
 
 
-ProductsTable *products_table_create();
+ProductsTable *products_table_create(void);
 
 int products_table_load(const ProductsTable *products_table);
 int products_table_save(const ProductsTable *products_table);
