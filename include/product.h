@@ -48,13 +48,14 @@ unsigned int products_table_add(
 // returns 0 or -1 if not found, 1 if error occurs
 int products_table_delete_by_id(ProductsTable *products_table, const unsigned int product_id);
 
-// chenges record with product_id = product_id, recounts indexes
+// changes record with product_id = product_id, recounts indexes
 // returns 0 or -1 if not found, 1 if error occurs
 int products_table_edit_record(
     ProductsTable *products_table,
     const unsigned int product_id,
     const char *name,
     const unsigned int unit_price,
+    const bool change_quantity,
     const unsigned int quantity
 );
 

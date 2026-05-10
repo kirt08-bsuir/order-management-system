@@ -205,6 +205,50 @@ int products_table_delete_by_id(ProductsTable *products_table, const unsigned in
     return 0;
 }
 
+int products_table_edit_record(
+    ProductsTable *products_table,
+    const unsigned int product_id,
+    const char *name,
+    const unsigned int unit_price,
+    const bool change_quantity,
+    const unsigned int quantity
+) {
+    if (!products_table) return 1;
+
+    int idx = _products_binary_search_by_id(products_table, product_id);
+    if (idx == -1) {
+        if (DEBUG) printf("Recor wasn't found.\n");
+        return -1;
+    }
+
+    Product *p = &products_table->original_table[idx];
+
+    if (name != NULL && name[0] != '\0') {
+        if (!validate_non_empty_string(name)) {
+            printf("New name has invalid format.\n");
+            return 1;
+        }
+        strncpy(p->name, name, PRODUCT_NAME_MAX - 1);
+        p->name[PRODUCT_NAME_MAX - 1] = '\0';
+        _products_rebuild_index_by_name(products_table);
+    }
+
+    if (unit_price > 0) {
+        if (!validate_price(unit_price)) {
+            printf("New unit_price has invalid format.\n");
+            return 1;
+        }
+        p->unit_price = unit_price;
+    }
+
+    if (change_quantity) {
+        p->quantity = quantity;
+        _products_rebuild_index_by_quantity(products_table);
+    }
+
+    return 0;
+}
+
 void product_print(const Product *p) {
     if (!p) return;
  

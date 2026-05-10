@@ -24,6 +24,12 @@ void run_tests(void) {
     assert(test_unit_products_delete_existing_record_after_expanding() == 1);
     printf("[OK] test_unit_products_delete_existing_record_after_expanding\n");
 
+    assert(test_unit_products_editing_invalid() == 1);
+    printf("[OK] test_unit_products_editing_invalid\n");
+    
+    assert(test_unit_products_editing_valid() == 1);
+    printf("[OK] test_unit_products_editing_valid\n");
+
 
     // printf("\n--------- (Integration) ---------\n");
     // assert(test_integration_add_and_rebuild_indexes() == 1);

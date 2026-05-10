@@ -8,6 +8,8 @@ int test_unit_products_resize_capacity(void);
 int test_unit_products_delete_non_existing_record(void);
 int test_unit_products_delete_existing_record(void);
 int test_unit_products_delete_existing_record_after_expanding(void);
+int test_unit_products_editing_invalid(void);
+int test_unit_products_editing_valid(void);
 
 
 // integration tests

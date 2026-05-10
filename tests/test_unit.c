@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "tests.h"
 #include "config.h"
@@ -68,6 +69,29 @@ int test_unit_products_delete_existing_record_after_expanding(void) {
 
     int res = products_table_delete_by_id(table, 1);
     
+    products_table_free(table);
+    table = NULL;
+
+    if (res == 0) return 1; else return 0;
+}
+
+int test_unit_products_editing_invalid(void) {
+    ProductsTable *table = products_table_create();
+
+    int res = products_table_edit_record(table, 2, "", 0, false, 0);
+
+    products_table_free(table);
+    table = NULL;
+
+    if (res == -1) return 1; else return 0;
+}
+
+int test_unit_products_editing_valid(void) {
+    ProductsTable *table = products_table_create();
+
+    products_table_add(table, "Test", 1, 1);
+    int res = products_table_edit_record(table, 1, "Unit-Test", 0, false, 0);
+
     products_table_free(table);
     table = NULL;
 
