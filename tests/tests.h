@@ -3,8 +3,11 @@
 
 
 // unit tests
-int test_unit_table_create(void);
-int test_unit_resize_capacity(void);
+int test_unit_products_table_create(void);
+int test_unit_products_resize_capacity(void);
+int test_unit_products_delete_non_existing_record(void);
+int test_unit_products_delete_existing_record(void);
+int test_unit_products_delete_existing_record_after_expanding(void);
 
 
 // integration tests

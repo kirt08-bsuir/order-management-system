@@ -54,6 +54,22 @@ static int _names_comporator(const char *s1, const char *s2) {
     return tolower((unsigned char)*s1) - tolower((unsigned char)*s2);
 }
 
+static int _products_binary_search_by_id(const ProductsTable *products_table, const unsigned int product_id) {
+    if (!products_table || products_table->size == 0) return -1;
+
+    int left = 0, right = (int)products_table->size - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        unsigned int mid_id = products_table->original_table[mid].product_id;
+
+        if (mid_id == product_id) return mid;
+
+        if (mid_id < product_id) left = mid + 1; else right = mid - 1;
+    }
+
+    return -1;
+}
+
 static void _products_rebuild_index_by_name(ProductsTable *products_table) {
     if (!products_table || products_table->size == 0) return;
     
@@ -174,6 +190,19 @@ unsigned int products_table_add(
     _products_rebuild_index_by_name(products_table);
     _products_rebuild_index_by_quantity(products_table);
     return new_id;
+}
+
+int products_table_delete_by_id(ProductsTable *products_table, const unsigned int product_id) {
+    if (!products_table) return 1;
+
+    int idx = _products_binary_search_by_id(products_table, product_id);
+    if (idx == -1) {
+        if (DEBUG) printf("Record wasn't found.\n");
+        return -1;
+    }
+
+    products_table->original_table[idx].is_deleted = true;
+    return 0;
 }
 
 void product_print(const Product *p) {
