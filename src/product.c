@@ -264,6 +264,23 @@ Product *products_table_search_by_id(ProductsTable *products_table, const unsign
     return p;
 }
 
+int products_table_filter_by_quantity(ProductsTable *products_table, const unsigned int target) {
+    if (!products_table) return 1;
+
+    int count = 0;
+    for (unsigned int i = 0; i < products_table->size; i++) {
+        unsigned int idx = products_table->sorted_by_quantity[i].idx;
+        Product *p = &products_table->original_table[idx];
+
+        if (p->quantity > target) break;
+
+        if (!p->is_deleted) product_print(p);
+        count++;
+    }
+    if (count == 0) printf("No such records in the products table.\n");
+    return 0;
+}
+
 void product_print(const Product *p) {
     if (!p) return;
  
@@ -292,6 +309,37 @@ void products_table_print_all(const ProductsTable *products_table) {
     }
     if (count == 0) printf("Products table is empty.\n");
 }
+
+void products_table_sorted_by_name(const ProductsTable *products_table) {
+    if (!products_table) return;
+ 
+    int count = 0;
+    for (unsigned int i = 0; i < products_table->size; i++) {
+        unsigned int idx = products_table->sorted_by_name[i].idx;
+        if (!products_table->original_table[idx].is_deleted) {
+            product_print(&products_table->original_table[idx]);
+            count++;
+        }
+    }
+ 
+    if (count == 0) printf("Products table is empty.\n");
+}
+ 
+void products_table_sorted_by_quantity(const ProductsTable *products_table) {
+    if (!products_table) return;
+ 
+    int count = 0;
+    for (unsigned int i = 0; i < products_table->size; i++) {
+        unsigned int idx = products_table->sorted_by_quantity[i].idx;
+        if (!products_table->original_table[idx].is_deleted) {
+            product_print(&products_table->original_table[idx]);
+            count++;
+        }
+    }
+ 
+    if (count == 0) printf("Products table is empty.\n");
+}
+ 
 
 void products_table_free(ProductsTable *products_table) {
     if (!products_table) return;

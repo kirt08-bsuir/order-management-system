@@ -1,7 +1,7 @@
 TARGET = order-management-system
 
 CC = gcc
-CFLAGS = -Iinclude -Wall -Wextra -g -std=c11
+CFLAGS = -Iinclude -Itests -Wall -Wextra -g -std=c11
 TEST_FLAGS = -Itests
 
 SRC_DIR = src
@@ -21,13 +21,8 @@ all: prepare $(TARGET)
 prepare:
 	@mkdir -p $(BUILD_DIR)
 
-$(TARGET): $(OBJS)
-	$(CC) $(OBJS) -o $(TARGET)
-
-test: CFLAGS += $(TEST_FLAGS)
-test: clean prepare $(OBJS) $(TEST_OBJS)
+$(TARGET): $(OBJS) $(TEST_OBJS)
 	$(CC) $(OBJS) $(TEST_OBJS) -o $(TARGET)
-	./$(TARGET) --test
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -35,10 +30,13 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 $(BUILD_DIR)/test_%.o: $(TEST_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+test: all
+	./$(TARGET) --test
+
 run: all
 	./$(TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET)
 
-.PHONY: all clean run prepare
+.PHONY: all clean run prepare test

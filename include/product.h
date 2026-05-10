@@ -77,7 +77,7 @@ void products_table_print_all(const ProductsTable *products_table);
 void products_table_sorted_by_name(const ProductsTable *products_table);
 
 // print records sorted by quantity where is_deleted = false
-void products_table_print_sorted_by_quantity(const ProductsTable *product_table);
+void products_table_sorted_by_quantity(const ProductsTable *product_table);
 
 void products_table_free(ProductsTable *products_table);
 
