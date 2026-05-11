@@ -4,6 +4,7 @@
 
 #include "tests.h"
 #include "config.h"
+#include "orders.h"
 #include "product.h" 
 
 
@@ -18,19 +19,43 @@ int test_unit_products_table_create(void) {
     return 1;
 }
 
+int test_unit_orders_table_create(void) {
+    OrdersTable *table = orders_table_create();
+    if (!table) return 0;
+    if (table->size != 0) return 0;
+    if (table->capacity <= 0) return 0;
+
+    orders_table_free(table);
+    table = NULL;
+    return 1;
+}
+
 int test_unit_products_resize_capacity(void) {
     ProductsTable *table = products_table_create();
     if (!table) return 0;
     
     unsigned int old_capacity = table->capacity;
     
-    // Искусственно заполняем size, чтобы спровоцировать realloc при добавлении
-    table->size = old_capacity; 
-    for (unsigned int i = 0; i < PRODUCT_INITIAL_CAPACITY; i++) products_table_add(table, "Test Item", 100, 10);
-    
+    for (unsigned int i = 0; i < old_capacity + 2; i++) products_table_add(table, "Test Item", 100, 10);
+
     if (table->capacity <= old_capacity) return 0;
     
     products_table_free(table);
+    table = NULL;
+    
+    return 1;
+}
+
+int test_unit_orders_table_resize_capacity(void) {
+    OrdersTable *table = orders_table_create();
+    if (!table) return 0;
+    
+    unsigned int old_capacity = table->capacity;
+    
+    for (unsigned int i = 0; i < old_capacity + 2; i++) orders_table_add(table, "Test Item");
+    if (table->capacity <= old_capacity) return 0;
+    
+    orders_table_free(table);
     table = NULL;
     
     return 1;
@@ -42,6 +67,17 @@ int test_unit_products_delete_non_existing_record(void) {
     int res = products_table_delete_by_id(table, 10);
 
     products_table_free(table);
+    table = NULL;
+
+    if (res == -1) return 1; else return 0;
+}
+
+int test_unit_orders_delete_non_existing_record(void) {
+    OrdersTable *table = orders_table_create();
+
+    int res = orders_table_delete(table, 10);
+
+    orders_table_free(table);
     table = NULL;
 
     if (res == -1) return 1; else return 0;
@@ -60,6 +96,20 @@ int test_unit_products_delete_existing_record(void) {
     return 0;
 }
 
+int test_unit_orders_delete_existing_record(void) {
+    OrdersTable *table = orders_table_create();
+
+    orders_table_add(table, "TEST");
+    int res = orders_table_delete(table, 1);
+
+    orders_table_free(table);
+    table = NULL;
+
+    if (res == 0) return 1;
+    return 0;
+}
+
+
 int test_unit_products_delete_existing_record_after_expanding(void) {
     ProductsTable *table = products_table_create();
 
@@ -75,6 +125,21 @@ int test_unit_products_delete_existing_record_after_expanding(void) {
     if (res == 0) return 1; else return 0;
 }
 
+int test_unit_orders_delete_existing_record_after_expanding(void) {
+    OrdersTable *table = orders_table_create();
+
+    unsigned int old_capacity = table->capacity;
+    for (unsigned int i = 0; i < old_capacity + 2; i++) orders_table_add(table, "TEST");
+    
+    int res = orders_table_delete(table, 1);
+
+    orders_table_free(table);
+    table = NULL;
+    
+    if (res == 0) return 1;
+    return 0;
+}
+
 int test_unit_products_editing_invalid(void) {
     ProductsTable *table = products_table_create();
 
@@ -84,6 +149,19 @@ int test_unit_products_editing_invalid(void) {
     table = NULL;
 
     if (res == -1) return 1; else return 0;
+}
+
+int test_unit_orders_editing_invalid(void) {
+    OrdersTable *table = orders_table_create();
+
+    orders_table_add(table, "TEST");
+    int res = orders_table_edit(table, 1, "");
+
+    orders_table_free(table);
+    table = NULL;
+
+    if (res == 1) return 1;
+    return 0;
 }
 
 int test_unit_products_editing_valid(void) {
@@ -98,6 +176,20 @@ int test_unit_products_editing_valid(void) {
     if (res == 0) return 1; else return 0;
 }
 
+
+int test_unit_orders_editing_valid(void) {
+    OrdersTable *table = orders_table_create();
+
+    orders_table_add(table, "TEST");
+    int res = orders_table_edit(table, 1, "SUPER-TEST");
+
+    orders_table_free(table);
+    table = NULL;
+
+    if (res == 0) return 1;
+    return 0;
+}
+
 int test_unit_products_search_by_id_non_existing_record(void) {
     ProductsTable *table = products_table_create();
 
@@ -109,6 +201,17 @@ int test_unit_products_search_by_id_non_existing_record(void) {
     if (p == NULL) return 1; else return 0;
 }
 
+int test_unit_orders_search_by_id_non_existing_record(void) {
+    OrdersTable *table = orders_table_create();
+
+    Order *o = orders_table_find_by_id(table, 1);
+
+    orders_table_free(table);
+    table = NULL;
+
+    if (o == NULL) return 1;
+    return 0;
+}
 
 int test_unit_products_search_by_id_existing_record(void) {
     ProductsTable *table = products_table_create();
@@ -120,4 +223,17 @@ int test_unit_products_search_by_id_existing_record(void) {
     table = NULL;
 
     if (p != NULL) return 1; else return 0;
+}
+
+int test_unit_orders_search_by_id_existing_record(void) {
+    OrdersTable *table = orders_table_create();
+
+    orders_table_add(table, "TEST");
+    Order *o = orders_table_find_by_id(table, 1);
+
+    orders_table_free(table);
+    table = NULL;
+
+    if (o != NULL) return 1;
+    return 0;
 }
