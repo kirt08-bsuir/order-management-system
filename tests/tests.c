@@ -10,10 +10,10 @@ void run_tests(void) {
     printf("\n--------- (Unit) ---------\n");
 
     assert(test_unit_products_table_create() == 1);
-    printf("[OK] test_unit_table_create\n");
+    printf("[OK] test_unit_products_table_create\n");
 
     assert(test_unit_products_resize_capacity() == 1);
-    printf("[OK] test_unit_resize_capacity\n");
+    printf("[OK] test_unit_products_resize_capacity\n");
 
     assert(test_unit_products_delete_non_existing_record() == 1);
     printf("[OK] test_unit_products_delete_non_existing_record\n");
@@ -35,6 +35,33 @@ void run_tests(void) {
 
     assert(test_unit_products_search_by_id_existing_record() == 1);
     printf("[OK] test_unit_products_search_by_id_existing_record\n");
+
+    assert(test_unit_orders_table_create() == 1);
+    printf("[OK] test_unit_orders_table_create\n");
+
+    assert(test_unit_orders_table_resize_capacity() == 1);
+    printf("[OK] test_unit_products_resize_capacity\n");
+
+    assert(test_unit_orders_delete_non_existing_record() == 1);
+    printf("[OK] test_unit_orders_delete_non_existing_record\n");
+
+    assert(test_unit_orders_delete_existing_record() == 1);
+    printf("[OK] test_unit_orders_delete_existing_record\n");
+
+    assert(test_unit_orders_delete_existing_record_after_expanding() == 1);
+    printf("[OK] test_unit_orders_delete_existing_record_after_expanding\n");
+
+    assert(test_unit_orders_editing_invalid() == 1);
+    printf("[OK] test_unit_orders_editing_invalid\n");
+
+    assert(test_unit_orders_editing_valid() == 1);
+    printf("[OK] test_unit_orders_editing_invalid\n");
+
+    assert(test_unit_orders_search_by_id_non_existing_record() == 1);
+    printf("[OK] test_unit_orders_search_by_id_non_existing_record\n");
+
+    assert(test_unit_orders_search_by_id_existing_record() == 1);
+    printf("[OK] test_unit_orders_search_by_id_existing_record\n");
 
     // printf("\n--------- (Integration) ---------\n");
     // assert(test_integration_add_and_rebuild_indexes() == 1);
