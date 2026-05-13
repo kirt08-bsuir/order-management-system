@@ -31,7 +31,9 @@ typedef struct {
 
 ProductsTable *products_table_create(void);
 
-int products_table_load(const ProductsTable *products_table);
+// return 0, 1 if error occurs
+int products_table_load(ProductsTable *products_table);
+
 int products_table_save(const ProductsTable *products_table);
 
 // adds new_record to table, recounts indexes, changes size

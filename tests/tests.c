@@ -64,6 +64,9 @@ void run_tests(void) {
     printf("[OK] test_unit_orders_search_by_id_existing_record\n");
 
     printf("\n--------- (Integration) ---------\n");
+    assert(test_integrity_products_save_and_load() == 1);
+    printf("[OK] test_integrity_products_save_and_load\n");
+
     assert(test_integrity_orders_save_and_load() == 1);
     printf("[OK] test_integrity_orders_save_and_load\n");
 

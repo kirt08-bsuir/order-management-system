@@ -25,6 +25,7 @@ int test_unit_orders_search_by_id_existing_record(void);
 
 
 // integration tests
+int test_integrity_products_save_and_load(void);
 int test_integrity_orders_save_and_load(void);
 
 // main func
