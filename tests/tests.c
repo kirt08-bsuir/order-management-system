@@ -63,9 +63,9 @@ void run_tests(void) {
     assert(test_unit_orders_search_by_id_existing_record() == 1);
     printf("[OK] test_unit_orders_search_by_id_existing_record\n");
 
-    // printf("\n--------- (Integration) ---------\n");
-    // assert(test_integration_add_and_rebuild_indexes() == 1);
-    // printf("[OK] test_integration_add_and_rebuild_indexes\n");
+    printf("\n--------- (Integration) ---------\n");
+    assert(test_integrity_orders_save_and_load() == 1);
+    printf("[OK] test_integrity_orders_save_and_load\n");
 
     printf("\n===================================\n");
     printf("✅ TESTS PASSED SUCCESSFULLY!\n");
