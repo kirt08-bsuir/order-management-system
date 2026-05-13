@@ -151,6 +151,96 @@ ProductsTable *products_table_create() {
     return products_table;
 }
 
+int products_table_load(ProductsTable *products_table) {
+    if (!products_table) return 1;
+
+    FILE *f = fopen(PRODUCT_FILE, "rb");
+    if (!f) {
+        if (DEBUG) printf("Cannot open file %s for reading.\n", PRODUCT_FILE);
+        return 1; 
+    }
+
+    unsigned int last_id = 0;
+    unsigned int size = 0;
+
+    if (fread(&last_id, sizeof(unsigned int), 1, f) != 1) {
+        if (DEBUG) printf("Cannot read last_id from %s.\n", PRODUCT_FILE);
+        fclose(f);
+        return 1;
+    }
+
+    if (fread(&size, sizeof(unsigned int), 1, f) != 1) {
+        if (DEBUG) printf("Cannot read size from %s.\n", PRODUCT_FILE);
+        fclose(f);
+        return 1;
+    }
+
+    while (products_table->capacity < size) {
+        if (_products_resize(products_table) != 0) {
+            fclose(f);
+            return 1;
+        }
+    }
+
+    for (unsigned int i = 0; i < size; i++) {
+        if (fread(&products_table->original_table[i], sizeof(Product), 1, f) != 1) {
+            if (DEBUG) printf("Error reading order record from %s.\n", PRODUCT_FILE);
+            fclose(f);
+            return 1;
+        }
+    }
+
+    products_table->size = size;
+    products_table->last_id = last_id;
+
+    fclose(f);
+
+    _products_rebuild_index_by_name(products_table);
+    _products_rebuild_index_by_quantity(products_table);
+
+    return 0;
+}
+
+int products_table_save(const ProductsTable *products_table) {
+    if (!products_table) return 1;
+
+    FILE *f = fopen(PRODUCT_FILE, "wb");
+    if (!f) {
+        if (DEBUG) printf("Cannot open file %s for writing.\n", PRODUCT_FILE);
+        fclose(f);
+        return 1;
+    }
+
+    if (fwrite(&products_table->last_id, sizeof(unsigned int), 1, f) != 1) {
+        if (DEBUG) printf("Error writing last_id to %s.\n", PRODUCT_FILE);
+        fclose(f);
+        return 1;
+    }
+
+    unsigned int saved_count = 0;
+    for (unsigned int i = 0; i < products_table->size; i++) {
+        if (!products_table->original_table[i].is_deleted) saved_count++;
+    }
+
+    if (fwrite(&saved_count, sizeof(unsigned int), 1, f) != 1) {
+        if (DEBUG) printf("Error writing size to %s.\n", PRODUCT_FILE);
+        fclose(f);
+        return 1;
+    }
+
+    for (unsigned int i = 0; i < products_table->size; i++) {
+        if (!products_table->original_table[i].is_deleted) {
+            if (fwrite(&products_table->original_table[i], sizeof(Product), 1, f) != 1) {
+                if (DEBUG) printf("Error writing order record to %s.\n", PRODUCT_FILE);
+                fclose(f);
+                return 1;
+            }
+        }
+    }
+    fclose(f);
+    return 0;
+}
+
 unsigned int products_table_add(
     ProductsTable *products_table,
     const char *name,

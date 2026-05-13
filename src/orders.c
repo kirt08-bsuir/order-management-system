@@ -115,6 +115,95 @@ OrdersTable *orders_table_create(void) {
     return orders_table;
 }
 
+int orders_table_load(OrdersTable *orders_table) {
+    if (!orders_table) return 1;
+ 
+    FILE *f = fopen(ORDER_FILE, "rb");
+    if (!f) {
+        if (DEBUG) printf("Cannot open file %s for reading.\n", ORDER_FILE);
+        return -1;
+    }
+ 
+    unsigned int last_id = 0;
+    unsigned int size = 0;
+ 
+    if (fread(&last_id, sizeof(unsigned int), 1, f) != 1) {
+        if (DEBUG) printf("Cannot read last_id from %s.\n", ORDER_FILE);
+        fclose(f);
+        return -1;
+    }
+ 
+    if (fread(&size, sizeof(unsigned int), 1, f) != 1) {
+        if (DEBUG) printf("Cannot read size from %s.\n", ORDER_FILE);
+        fclose(f);
+        return -1;
+    }
+ 
+    while (orders_table->capacity < size) {
+        if (_orders_resize(orders_table) != 0) {
+            fclose(f);
+            return -1;
+        }
+    }
+ 
+    for (unsigned int i = 0; i < size; i++) {
+        if (fread(&orders_table->original_table[i], sizeof(Order), 1, f) != 1) {
+            if (DEBUG) printf("Error reading order record from %s.\n", ORDER_FILE);
+            fclose(f);
+            return -1;
+        }
+    }
+ 
+    orders_table->size = size;
+    orders_table->last_id = last_id;
+ 
+    fclose(f);
+ 
+    _orders_rebuild_index_by_name(orders_table);
+ 
+    return 0;
+}
+ 
+int orders_table_save(OrdersTable *orders_table) {
+    if (!orders_table) return 1;
+ 
+    FILE *f = fopen(ORDER_FILE, "wb");
+    if (!f) {
+        if (DEBUG) printf("Cannot open file %s for writing.\n", ORDER_FILE);
+        return -1;
+    }
+ 
+    if (fwrite(&orders_table->last_id, sizeof(unsigned int), 1, f) != 1) {
+        if (DEBUG) printf("Error writing last_id to %s.\n", ORDER_FILE);
+        fclose(f);
+        return -1;
+    }
+ 
+    unsigned int saved_count = 0;
+    for (unsigned int i = 0; i < orders_table->size; i++) {
+        if (!orders_table->original_table[i].is_deleted) saved_count++;
+    }
+ 
+    if (fwrite(&saved_count, sizeof(unsigned int), 1, f) != 1) {
+        if (DEBUG) printf("Error writing size to %s.\n", ORDER_FILE);
+        fclose(f);
+        return -1;
+    }
+ 
+    for (unsigned int i = 0; i < orders_table->size; i++) {
+        if (!orders_table->original_table[i].is_deleted) {
+            if (fwrite(&orders_table->original_table[i], sizeof(Order), 1, f) != 1) {
+                if (DEBUG) printf("Error writing order record to %s.\n", ORDER_FILE);
+                fclose(f);
+                return -1;
+            }
+        }
+    }
+ 
+    fclose(f);
+    return 0;
+}
+
 unsigned int orders_table_add(OrdersTable *orders_table, const char *name) {
     if (!orders_table) return 0;
  
