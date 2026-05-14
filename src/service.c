@@ -1,0 +1,139 @@
+#include <stdio.h>
+
+#include "config.h"
+#include "service.h"
+
+
+int service_load_tables(
+    ProductsTable *products_table,
+    OrdersTable *orders_table,
+    OrderItemsTable *order_items_table
+) {
+    if (products_table_load(products_table) != 0) {
+        if (DEBUG) printf("service_load_all: failed to load products.\n");
+        return -1;
+    }
+ 
+    if (orders_table_load(orders_table) != 0) {
+        if (DEBUG) printf("service_load_all: failed to load orders.\n");
+        return -1;
+    }
+ 
+    if (order_items_table_load(order_items_table) != 0) {
+        if (DEBUG) printf("service_load_all: failed to load order_items.\n");
+        return -1;
+    }
+ 
+    return 0;
+}
+
+int service_save_tables(
+    const ProductsTable *products_table,
+    const OrdersTable *orders_table,
+    const OrderItemsTable *order_items_table
+) {
+    if (products_table_save(products_table) != 0) {
+        if (DEBUG) printf("service_save_all: failed to save products.\n");
+        return -1;
+    }
+ 
+    if (orders_table_save(orders_table) != 0) {
+        if (DEBUG) printf("service_save_all: failed to save orders.\n");
+        return -1;
+    }
+ 
+    if (order_items_table_save(order_items_table) != 0) {
+        if (DEBUG) printf("service_save_all: failed to save order_items.\n");
+        return -1;
+    }
+ 
+    return 0;
+}
+
+int service_add_item_to_order(
+    ProductsTable *products_table,
+    OrdersTable *orders_table,
+    OrderItemsTable *order_items_table,
+    const unsigned int order_id,
+    const unsigned int product_id,
+    const unsigned int quantity
+) {
+    if (!products_table || !orders_table || !order_items_table) return 1;
+    
+    Order *order = orders_table_find_by_id(orders_table, order_id);
+    if (!order) {
+        if (DEBUG) printf("service_add_item_to_order: order %u not found.\n", order_id);
+        return -1;
+    }
+
+    Product *product = products_table_search_by_id(products_table, product_id);
+    if (!product) {
+        if (DEBUG) printf("service_add_item_to_order: product %u not found.\n", product_id);
+        return -2;
+    }
+
+    if (order_items_table_add(order_items_table, order_id, product_id, quantity));
+
+    OrderItem *item = order_items_table_find_order_item(order_items_table, order_id, product_id);
+    if (!item) return 1;
+ 
+    unsigned int new_total_cost = item->quantity * product->unit_price;
+    int old_cost = item->total_cost;
+
+    order_items_table_set_total_cost(order_items_table, order_id, product_id, new_total_cost);
+ 
+    int delta = (int)new_total_cost - (old_cost >= 0 ? old_cost : 0);
+    orders_table_update_total_sum(orders_table, order_id, delta);
+ 
+    return 0;
+}
+
+int service_delete_item_from_order(
+    OrdersTable *orders_table,
+    OrderItemsTable *order_items_table,
+    const unsigned int order_id,
+    const unsigned int product_id
+) {
+    if (!orders_table || !order_items_table) return 1;
+ 
+    int cost = order_items_table_get_total_cost(order_items_table, order_id, product_id);
+ 
+    if (order_items_table_delete(order_items_table, order_id, product_id) != 0) return 1;
+    orders_table_update_total_sum(orders_table, order_id, -(int)cost);
+ 
+    return 0;
+}
+
+int service_delete_order(
+    OrdersTable *orders_table,
+    OrderItemsTable *order_items_table,
+    const unsigned int order_id
+) {
+    if (!orders_table || !order_items_table) return 1;
+ 
+    Order *order = orders_table_find_by_id(orders_table, order_id);
+    if (!order) {
+        if (DEBUG) printf("service_delete_order: order %u not found.\n", order_id);
+        return -1;
+    }
+ 
+    OrderItem **items = order_items_table_find_by_order(order_items_table, order_id);
+    if (items) {
+        for (int i = 0; items[i] != NULL; i++) {
+            order_items_table_delete(order_items_table, order_id, items[i]->product_id);
+        }
+        free(items);
+    }
+ 
+    orders_table_delete(orders_table, order_id);
+ 
+    return 0;
+}
+
+void service_filter_products_by_quantity(
+    ProductsTable *products_table,
+    const unsigned int target
+) {
+    if (!products_table) return;
+    products_table_filter_by_quantity(products_table, target);
+}
