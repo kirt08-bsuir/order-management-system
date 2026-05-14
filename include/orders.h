@@ -54,6 +54,9 @@ int orders_table_update_total_sum(OrdersTable *orders_table, const unsigned int 
 
 Order *orders_table_find_by_id(const OrdersTable *orders_table, const unsigned int order_id);
 
+// print all records, where name == target_name
+void orders_table_find_by_name(const OrdersTable *orders_table, const char *name);
+
 void order_print(const Order* order);
 
 void orders_table_print_all(const OrdersTable *orders_table);

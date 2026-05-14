@@ -354,6 +354,23 @@ Product *products_table_search_by_id(ProductsTable *products_table, const unsign
     return p;
 }
 
+void products_table_find_by_name(const ProductsTable *products_table, const char *name) {
+    if (!products_table) return;
+
+    int count = 0;
+    for (unsigned int i =0; i < products_table->size; i++) {
+        Product *p = &products_table->original_table[i];
+        if (p->is_deleted) continue;
+
+        if (_names_comporator(p->name, name) == 0) {
+            product_print(p);
+            count++;
+        }
+    }
+
+    if (count == 0) printf("No products with such name.\n");
+}
+
 int products_table_filter_by_quantity(ProductsTable *products_table, const unsigned int target) {
     if (!products_table) return 1;
 

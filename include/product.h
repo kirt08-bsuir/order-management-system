@@ -64,6 +64,9 @@ int products_table_edit_record(
 // returns NULL if not found
 Product *products_table_search_by_id(ProductsTable *products_table, const unsigned int product_id);
 
+// print records where name == target name
+void products_table_find_by_name(const ProductsTable *products_table, const char *name);
+
 // find and show all records where quantity <= target
 // showing inside
 // returns 0 or 1 if erorr occurs

@@ -313,6 +313,21 @@ Order *orders_table_find_by_id(const OrdersTable *orders_table, const unsigned i
     return o;
 }
 
+void orders_table_find_by_name(const OrdersTable *orders_table, const char *name) {
+    if (!orders_table) return;
+
+    int count = 0;
+    for (unsigned int i = 0; i < orders_table->size; i++) {
+        Order *o = &orders_table->original_table[i];
+        if (o->is_deleted) continue;
+        if (_names_comparator(o->customer_name, name) == 0) {
+            order_print(o);
+            count++;
+        }
+    }
+    if (count == 0) printf("No records with such customer_name.\n");
+}
+
 void order_print(const Order *o) {
     if (!o) return;
  
