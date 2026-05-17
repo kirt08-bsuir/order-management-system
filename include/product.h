@@ -73,7 +73,8 @@ int products_table_add_delta_to_quantity(
 );
 
 // returns NULL if not found
-Product *products_table_search_by_id(ProductsTable *products_table, const unsigned int product_id);
+// returns NULL if record was deleted (is_deleted = True)
+Product *products_table_search_by_id(const ProductsTable *products_table, const unsigned int product_id);
 
 // print records where name == target name
 void products_table_find_by_name(const ProductsTable *products_table, const char *name);

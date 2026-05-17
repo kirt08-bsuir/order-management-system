@@ -60,7 +60,7 @@ static Step handle_main(bool data_loaded) {
         printf("  5. Add records\n");
         printf("  6. Delete records\n");
         printf("  7. Edit records\n");
-        printf("  8. Special function\n");
+        printf("  8. Invoices\n");
         printf("  9. Exit without saving\n");
         printf(" 10. Exit and save\n");
     }
@@ -639,21 +639,45 @@ static Step handle_edit(
     return STEP_EDIT;
 }
 
-/* =========================================================
- * SPECIAL FUNCTION (STEP 8)
- * ========================================================= */
-
-static Step handle_sf(void) {
-    print_header("SPECIAL FUNCTION");
-    printf("  Shipping invoice generation.\n");
-    printf("  To be implemented.\n");
-    wait_for_enter();
-    return STEP_MAIN;
+static Step handle_sf(
+    ProductsTable *pt,
+    OrdersTable *ot,
+    OrderItemsTable *oit
+) {
+    print_header("SPECIAL FUNCTION — INVOICES");
+    printf("  0. Back\n");
+    printf("  1. Print invoice for a specific order\n");
+    printf("  2. Print invoices for all orders\n");
+    printf("\n  Your choice: ");
+ 
+    char ch = input_get_char();
+ 
+    switch (ch) {
+        case '0': return STEP_MAIN;
+ 
+        case '1': {
+            printf("  Order ID: ");
+            unsigned int id = input_get_uint();
+ 
+            int res = service_print_invoice(pt, ot, oit, id);
+            if (res == -1) printf("  ! Order ID %u not found.\n", id);
+            else if (res == 1) printf("  ! Failed to write invoice file.\n");
+ 
+            wait_for_enter();
+            break;
+        }
+ 
+        case '2':
+            service_print_all_invoices(pt, ot, oit);
+            wait_for_enter();
+            break;
+ 
+        default:
+            printf("  Invalid input.\n");
+    }
+ 
+    return STEP_SF;
 }
-
-/* =========================================================
- * main
- * ========================================================= */
 
 int main(int argc, char *argv[]) {
     if (argc > 1 && strcmp(argv[1], "--test") == 0) { run_tests(); return 0; }
@@ -718,7 +742,7 @@ int main(int argc, char *argv[]) {
                 break;
 
             case STEP_SF:
-                step = handle_sf();
+                step = handle_sf(products_table, orders_table, order_items_table);
                 break;
 
             case STEP_EXIT_NO_SAVE:

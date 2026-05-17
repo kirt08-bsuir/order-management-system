@@ -4,6 +4,7 @@
 #include "orders.h"
 #include "product.h"
 #include "order_items.h"
+ 
 
 // read all 3 tables from files
 int service_load_tables(
@@ -68,5 +69,20 @@ void service_filter_products_by_quantity(
     ProductsTable *products_table,
     const unsigned int target
 );
+
+
+int service_print_invoice(
+    const ProductsTable *products_table,
+    const OrdersTable *orders_table,
+    const OrderItemsTable *order_items_table,
+    const unsigned int order_id
+);
+ 
+void service_print_all_invoices(
+    const ProductsTable *products_table,
+    const OrdersTable *orders_table,
+    const OrderItemsTable *order_items_table
+);
+
 
 #endif

@@ -4,6 +4,51 @@
 #include "service.h"
 
 
+static void _write_invoice(
+    FILE *out,
+    const Order *order,
+    OrderItem **items,
+    const ProductsTable *products_table
+) {
+    fprintf(out, "================================================================\n");
+    fprintf(out, "  INVOICE\n");
+    fprintf(out, "================================================================\n");
+    fprintf(out, "  Order ID  : %u\n", order->order_id);
+    fprintf(out, "  Customer  : %s\n", order->customer_name);
+    fprintf(out, "  Date      : %s\n", order->order_date[0] ? order->order_date : "-");
+    fprintf(out, "----------------------------------------------------------------\n");
+    fprintf(out, "  %-5s  %-20s  %-16s  %-8s  %s\n",
+            "ID", "Name", "Quantity", "Price", "Total");
+    fprintf(out, "----------------------------------------------------------------\n");
+ 
+    unsigned int recalculated_sum = 0;
+ 
+    for (int i = 0; items[i] != NULL; i++) {
+        OrderItem *item = items[i];
+ 
+        Product *p = products_table_search_by_id(products_table, item->product_id);
+ 
+        if (!p) {
+            fprintf(out, "  %-5u  %-20s  %-16u  %-8s  %u\n",
+                    item->product_id, "[removed]",
+                    item->quantity, "?", item->total_cost);
+            recalculated_sum += item->total_cost;
+            continue;
+        }
+ 
+        unsigned int line_total = item->quantity * p->unit_price;
+        recalculated_sum += line_total;
+ 
+        fprintf(out, "  %-5u  %-20s  %-16u  %-8u  %u\n",
+                item->product_id, p->name,
+                item->quantity, p->unit_price, line_total);
+    }
+ 
+    fprintf(out, "================================================================\n");
+    fprintf(out, "  TOTAL: %u\n", recalculated_sum);
+    fprintf(out, "================================================================\n");
+}
+
 int service_load_tables(
     ProductsTable *products_table,
     OrdersTable *orders_table,
@@ -182,4 +227,65 @@ void service_filter_products_by_quantity(
 ) {
     if (!products_table) return;
     products_table_filter_by_quantity(products_table, target);
+}
+
+int service_print_invoice(
+    const ProductsTable *products_table,
+    const OrdersTable *orders_table,
+    const OrderItemsTable *order_items_table,
+    const unsigned int order_id
+) {
+    if (!products_table || !orders_table || !order_items_table) return 1;
+ 
+    Order *order = orders_table_find_by_id(orders_table, order_id);
+    if (!order) {
+        if (DEBUG) printf("service_print_invoice: order %u not found.\n", order_id);
+        return -1;
+    }
+ 
+    OrderItem **items = order_items_table_find_by_order(
+        (OrderItemsTable *)order_items_table, order_id);
+ 
+    if (!items) {
+        printf("  Order %u has no items.\n", order_id);
+        return 0;
+    }
+ 
+    _write_invoice(stdout, order, items, products_table);
+ 
+    char filename[64];
+    snprintf(filename, sizeof(filename), DATA_FOLDER_PREFIX "invoice_%u.txt", order_id);
+ 
+    FILE *f = fopen(filename, "w");
+    if (!f) {
+        if (DEBUG) printf("service_print_invoice: cannot open %s for writing.\n", filename);
+        free(items);
+        return 1;
+    }
+ 
+    _write_invoice(f, order, items, products_table);
+    fclose(f);
+ 
+    printf("  Invoice saved to %s\n\n", filename);
+ 
+    free(items);
+    return 0;
+}
+
+void service_print_all_invoices(
+    const ProductsTable *products_table,
+    const OrdersTable *orders_table,
+    const OrderItemsTable *order_items_table
+) {
+    if (!products_table || !orders_table || !order_items_table) return;
+ 
+    int count = 0;
+    for (unsigned int i = 0; i < orders_table->size; i++) {
+        Order *o = &orders_table->original_table[i];
+        if (o->is_deleted) continue;
+        service_print_invoice(products_table, orders_table, order_items_table, o->order_id);
+        count++;
+    }
+ 
+    if (count == 0) printf("  No orders found.\n");
 }

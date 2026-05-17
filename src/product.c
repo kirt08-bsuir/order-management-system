@@ -366,7 +366,7 @@ int products_table_add_delta_to_quantity(
     return 0;
 }
 
-Product *products_table_search_by_id(ProductsTable *products_table, const unsigned int product_id) {
+Product *products_table_search_by_id(const ProductsTable *products_table, const unsigned int product_id) {
     if (!products_table) return NULL;
 
     int idx = _products_binary_search_by_id(products_table, product_id);
