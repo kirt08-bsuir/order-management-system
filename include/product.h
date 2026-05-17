@@ -61,6 +61,17 @@ int products_table_edit_record(
     const unsigned int quantity
 );
 
+// inside operation product->quantity + delta, so if you want to decrese delta use -delta
+// return 0 - ok
+// return -1 - something went wrong
+// return -2 - incorrect delta
+// return -3 - product not found
+int products_table_add_delta_to_quantity(
+    ProductsTable *products_table,
+    const unsigned int product_id,
+    const int delta
+);
+
 // returns NULL if not found
 Product *products_table_search_by_id(ProductsTable *products_table, const unsigned int product_id);
 

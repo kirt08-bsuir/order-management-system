@@ -32,7 +32,7 @@ typedef struct {
 OrdersTable *orders_table_create(void);
 
 int orders_table_load(OrdersTable *orders_table);
-int orders_table_save(OrdersTable *orders_table);
+int orders_table_save(const OrdersTable *orders_table);
 
 // add new record into orders_table
 // returns new_order_id or 0 if error occurs

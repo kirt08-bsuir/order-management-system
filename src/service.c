@@ -66,17 +66,29 @@ int service_add_item_to_order(
         return -1;
     }
 
+    int res = products_table_add_delta_to_quantity(products_table, product_id, -quantity);
+    if (res == -3) {
+        if (DEBUG) printf("service_add_item_to_order: product %u not found.\n", product_id);
+        return -2;
+    }
+    else if (res == -2) {
+        if (DEBUG) printf("service_add_item_to_order: not enough quantity for such operation\n");
+        return -3;
+    }
+
+    if (order_items_table_add(order_items_table, order_id, product_id, quantity) != 0) {
+        if (DEBUG) printf("service_add_item_to_order: failed to add order_item.\n");
+        return 1;
+    }
+
+    OrderItem *item = order_items_table_find_order_item(order_items_table, order_id, product_id);
+    if (!item) return 1;
+ 
     Product *product = products_table_search_by_id(products_table, product_id);
     if (!product) {
         if (DEBUG) printf("service_add_item_to_order: product %u not found.\n", product_id);
         return -2;
     }
-
-    if (order_items_table_add(order_items_table, order_id, product_id, quantity));
-
-    OrderItem *item = order_items_table_find_order_item(order_items_table, order_id, product_id);
-    if (!item) return 1;
- 
     unsigned int new_total_cost = item->quantity * product->unit_price;
     int old_cost = item->total_cost;
 
@@ -105,6 +117,7 @@ int service_delete_item_from_order(
 }
 
 int service_delete_order(
+    ProductsTable *products_table,
     OrdersTable *orders_table,
     OrderItemsTable *order_items_table,
     const unsigned int order_id
@@ -120,6 +133,11 @@ int service_delete_order(
     OrderItem **items = order_items_table_find_by_order(order_items_table, order_id);
     if (items) {
         for (int i = 0; items[i] != NULL; i++) {
+            int res = products_table_add_delta_to_quantity(products_table, items[i]->product_id, items[i]->quantity);
+            if (res != 0) {
+                if (DEBUG) printf("Something went wrong during recounting quantity of product inside deleting order proccess.\n");
+                return 1;
+            }
             order_items_table_delete(order_items_table, order_id, items[i]->product_id);
         }
         free(items);
@@ -128,6 +146,34 @@ int service_delete_order(
     orders_table_delete(orders_table, order_id);
  
     return 0;
+}
+
+int service_edit_product_record(
+    ProductsTable *products_table,
+    const OrderItemsTable *order_items_table,
+    const unsigned int product_id,
+    const char *name,
+    const unsigned int unit_price,
+    const bool change_quantity,
+    const unsigned int quantity
+) {
+    if (!products_table || !order_items_table) return 1;
+
+    if (unit_price != 0) {
+        Product *p = order_items_table_find_order_with_product_id(order_items_table, product_id);
+        if (p != NULL) return 2;
+    }
+
+    int res = products_table_edit_record(
+        products_table,
+        product_id,
+        name[0] ? name : NULL,
+        unit_price,
+        change_quantity,
+        quantity
+    );
+
+    return res;
 }
 
 void service_filter_products_by_quantity(

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -156,6 +157,7 @@ int products_table_load(ProductsTable *products_table) {
 
     FILE *f = fopen(PRODUCT_FILE, "rb");
     if (!f) {
+        if (errno == ENOENT) return 0;
         if (DEBUG) printf("Cannot open file %s for reading.\n", PRODUCT_FILE);
         return 1; 
     }
@@ -339,6 +341,31 @@ int products_table_edit_record(
     return 0;
 }
 
+int products_table_add_delta_to_quantity(
+    ProductsTable *products_table,
+    const unsigned int product_id,
+    const int delta
+) {
+    if (!products_table) return -1;
+
+    int idx = _products_binary_search_by_id(products_table, product_id);
+    if (idx == -1) {
+        if (DEBUG) printf("Record wasn't found.\n");
+        return -3;
+    }
+
+    Product *p = &products_table->original_table[idx];
+
+    if (delta < 0 && p->quantity < abs(delta)) {
+        if (DEBUG) printf("Invalid delta, expretion `p->quantity < delta` less then zero.\n");
+        return -2;
+    }
+
+    p->quantity += delta;
+    _products_rebuild_index_by_quantity(products_table);
+    return 0;
+}
+
 Product *products_table_search_by_id(ProductsTable *products_table, const unsigned int product_id) {
     if (!products_table) return NULL;
 
@@ -348,7 +375,7 @@ Product *products_table_search_by_id(ProductsTable *products_table, const unsign
         return NULL;
     }
 
-    Product* p = &products_table->original_table[idx];
+    Product *p = &products_table->original_table[idx];
 
     if (p->is_deleted) return NULL;
     return p;

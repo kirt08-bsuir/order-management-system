@@ -1,6 +1,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -120,6 +121,7 @@ int orders_table_load(OrdersTable *orders_table) {
  
     FILE *f = fopen(ORDER_FILE, "rb");
     if (!f) {
+        if (errno == ENOENT) return 0;
         if (DEBUG) printf("Cannot open file %s for reading.\n", ORDER_FILE);
         return -1;
     }
@@ -164,7 +166,7 @@ int orders_table_load(OrdersTable *orders_table) {
     return 0;
 }
  
-int orders_table_save(OrdersTable *orders_table) {
+int orders_table_save(const OrdersTable *orders_table) {
     if (!orders_table) return 1;
  
     FILE *f = fopen(ORDER_FILE, "wb");
