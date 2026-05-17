@@ -2,7 +2,7 @@
 #define CONDIG_H
 
 
-#define DEBUG 1
+#define DEBUG 0
 #define DATA_FOLDER_PREFIX "data/"
 
 // PRODUCT

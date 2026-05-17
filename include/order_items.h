@@ -58,6 +58,11 @@ OrderItem *order_items_table_find_order_item(
     const unsigned int product_id
 );
 
+OrderItem *order_items_table_find_order_with_product_id(
+    const OrderItemsTable *table,
+    const unsigned int product_id
+);
+
 OrderItem **order_items_table_find_by_order(
     OrderItemsTable *table,
     const unsigned int order_id

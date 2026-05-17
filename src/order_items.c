@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -69,6 +70,7 @@ int order_items_table_load(OrderItemsTable *table) {
 
     FILE *f = fopen(ORDER_ITEMS_FILE, "rb");
     if (!f) {
+        if (errno == ENOENT) return 0;
         if (DEBUG) printf("Cannot open file %s for reading.\n", ORDER_ITEMS_FILE);
         return 1;
     }
@@ -251,6 +253,15 @@ OrderItem *order_items_table_find_order_item(
     }
 
     return &table->original_table[idx];
+}
+
+OrderItem *order_items_table_find_order_with_product_id(const OrderItemsTable *table, const unsigned int product_id) {
+    if (!table) return NULL;
+
+    for (unsigned int i = 0; i < table->size; i++)
+        if (table->original_table[i].product_id == product_id) return &table->original_table[i];
+
+    return NULL;
 }
 
 OrderItem **order_items_table_find_by_order(

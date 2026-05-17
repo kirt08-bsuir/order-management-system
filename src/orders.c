@@ -1,6 +1,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -120,6 +121,7 @@ int orders_table_load(OrdersTable *orders_table) {
  
     FILE *f = fopen(ORDER_FILE, "rb");
     if (!f) {
+        if (errno == ENOENT) return 0;
         if (DEBUG) printf("Cannot open file %s for reading.\n", ORDER_FILE);
         return -1;
     }
@@ -164,7 +166,7 @@ int orders_table_load(OrdersTable *orders_table) {
     return 0;
 }
  
-int orders_table_save(OrdersTable *orders_table) {
+int orders_table_save(const OrdersTable *orders_table) {
     if (!orders_table) return 1;
  
     FILE *f = fopen(ORDER_FILE, "wb");
@@ -311,6 +313,21 @@ Order *orders_table_find_by_id(const OrdersTable *orders_table, const unsigned i
     if (o->is_deleted) return NULL;
  
     return o;
+}
+
+void orders_table_find_by_name(const OrdersTable *orders_table, const char *name) {
+    if (!orders_table) return;
+
+    int count = 0;
+    for (unsigned int i = 0; i < orders_table->size; i++) {
+        Order *o = &orders_table->original_table[i];
+        if (o->is_deleted) continue;
+        if (_names_comparator(o->customer_name, name) == 0) {
+            order_print(o);
+            count++;
+        }
+    }
+    if (count == 0) printf("No records with such customer_name.\n");
 }
 
 void order_print(const Order *o) {
